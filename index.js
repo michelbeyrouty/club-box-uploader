@@ -2,11 +2,6 @@ const express = require('express');         // Express Web Server
 const busboy = require('connect-busboy');   // Middleware to handle the file upload
 const path = require('path');               // Used for manipulation with path
 const fs = require('fs-extra');             // Classic fs
-const Dropbox = require('dropbox').Dropbox;
-
-const DROP_BOX_ACCESS_TOKEN = 'sl.AuGz1034szpkuvPuqyiPYs_Rf4cU9pFzUZvBh9O-HqhN2L326vc3GapkrstoM94'
-+ 'LXCSdfLc6raEz5k4ko71NwNjOuULaHDRoj8nR4Shj0vinRXiRXY7TEM4R7xuUOKCIf5uHoU8h4Eo';
-const filename = 'files';
 
 const app = express();
 
@@ -45,18 +40,12 @@ app.route('/upload').post((req, res, next) => {
 
 app.route('/download').post((req, res, next) => {
   console.log('inside download');
+  const request = require('request');
 
-  const dbx = new Dropbox({ accessToken: DROP_BOX_ACCESS_TOKEN });
 
-  dbx.filesDownload({ path: '/test.png' })
-        .then((response)=>  {
-          console.log('File Downloaded!' + response );
-
-        })
-        // .pipe(fs.createWriteStream(path.join(uploadPath, filename)))
-        .catch((error) => {
-          console.error(error);
-        });
+  request('https://api-content.dropbox.com/1/files/auto/' + '/test.png', {
+    auth: { bearer: 'l6iwj9af1i0bsr3' },
+  }).pipe(fs.createWriteStream('files/test.png'));
   return false;
 });
 
@@ -84,3 +73,18 @@ app.route('/').get((req, res) => {
 const server = app.listen(3000, () => {
   console.log(`Listening on port ${server.address().port}`);
 });
+
+
+// Method 2 for downloading dropbox
+
+// const dbx = new Dropbox({ accessToken: DROP_BOX_ACCESS_TOKEN });
+
+// dbx.filesDownload({ path: '/test.png' })
+//       .then((response)=>  {
+//         console.log('File Downloaded!' + response );
+//         const buffer = response.result.fileBinary.buffer;
+
+//       })
+//       .catch((error) => {
+//         console.error(error);
+//       });
