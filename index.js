@@ -1,19 +1,22 @@
-const express = require('express');         // Express Web Server
-const busboy = require('connect-busboy');   // Middleware to handle the file upload
-const path = require('path');               // Used for manipulation with path
-const fs = require('fs-extra');             // Classic fs
+const express = require('express');
+const busboy = require('connect-busboy');
+const path = require('path');
+const fs = require('fs-extra');
+const CUSTOM = require('./custom');
 
 const app = express();
 
-// Insert the busboy middle-ware
+// Insert middle-ware
 app.use(busboy({
-  highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
+  highWaterMark: 2 * 1024 * 1024, // 2MiB buffer
 }));
 
-const uploadPath = path.join(__dirname, 'files/'); // Register the upload path
+const uploadPath = path.join(__dirname, CUSTOM.FILE_LOCATION); // Register the upload path
 fs.ensureDir(uploadPath); // Make sure that the upload path exits
 
-// upload handler
+// Handlers
+
+// Upload handler
 app.route('/upload').post((req, res, next) => {
 
   req.pipe(req.busboy); // Pipe it trough busboy
@@ -23,6 +26,7 @@ app.route('/upload').post((req, res, next) => {
 
     // Create a write stream of the new file
     const fstream = fs.createWriteStream(path.join(uploadPath, filename));
+
     // Pipe it trough
     file.pipe(fstream);
 
@@ -34,21 +38,18 @@ app.route('/upload').post((req, res, next) => {
   });
 });
 
-// download handler
-app.route('/download').post((req, res, next) => {
-  console.log('inside download');
 
+// Download handler
+app.route('/download').post((req, res, next) => {
   const request = require('request');
 
-  const headers = {
-    'Authorization':   'Bearer 5C0XX-ba_sgAAAAAAAAAAYPnBFDgH6_9e9V_EzXItl2y-5ZB7bj8AhEiqVGjYi5x',
-    'Dropbox-API-Arg': '{"path": "/test.png"}',
-  };
-
   const options = {
-    url:     'https://content.dropboxapi.com/2/files/download',
+    url:     CUSTOM.DROPBOX.DOWNLOAD_URL,
     method:  'POST',
-    headers: headers,
+    headers: {
+      'Authorization':   `Bearer ${CUSTOM.DROPBOX.TOKEN}`,
+      'Dropbox-API-Arg': '{"path": "/test.png"}',
+    },
   };
 
   request(options).pipe(fs.createWriteStream('files/test.png'));
@@ -56,7 +57,7 @@ app.route('/download').post((req, res, next) => {
 });
 
 
-// basic html at root
+// Basic html at root
 app.route('/').get((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/html' });
   res.write('<div class="topnav">');
