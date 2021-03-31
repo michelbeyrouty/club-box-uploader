@@ -1,0 +1,12 @@
+{
+    "eslint.run": "onSave",
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#555a9e"
+    },
+    "editor.rulers": [
+        120
+    ],
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    }
+}
