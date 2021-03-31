@@ -40,12 +40,28 @@ app.route('/upload').post((req, res, next) => {
 
 app.route('/download').post((req, res, next) => {
   console.log('inside download');
+  // const request = require('request');
+  // const ACCESS_TOKEN = '5C0XX-ba_sgAAAAAAAAAAYPnBFDgH6_9e9V_EzXItl2y-5ZB7bj8AhEiqVGjYi5x';
+
+
+  // request('https://api-content.dropbox.com/2/files/download' + 'test.png', {
+  //   auth: { bearer: ACCESS_TOKEN },
+  // }).pipe(fs.createWriteStream('files/test.png'));
+
   const request = require('request');
 
+  const headers = {
+    'Authorization':   'Bearer 5C0XX-ba_sgAAAAAAAAAAYPnBFDgH6_9e9V_EzXItl2y-5ZB7bj8AhEiqVGjYi5x',
+    'Dropbox-API-Arg': '{"path": "/test.png"}',
+  };
 
-  request('https://api-content.dropbox.com/1/files/auto/' + '/test.png', {
-    auth: { bearer: 'l6iwj9af1i0bsr3' },
-  }).pipe(fs.createWriteStream('files/test.png'));
+  const options = {
+    url:     'https://content.dropboxapi.com/2/files/download',
+    method:  'POST',
+    headers: headers,
+  };
+
+  request(options).pipe(fs.createWriteStream('files/test.png'));
   return false;
 });
 
@@ -88,3 +104,4 @@ const server = app.listen(3000, () => {
 //       .catch((error) => {
 //         console.error(error);
 //       });
+
