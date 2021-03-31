@@ -13,10 +13,7 @@ app.use(busboy({
 const uploadPath = path.join(__dirname, 'files/'); // Register the upload path
 fs.ensureDir(uploadPath); // Make sure that the upload path exits
 
-
-/**
- * Create route /upload which handles the post request
- */
+// upload handler
 app.route('/upload').post((req, res, next) => {
 
   req.pipe(req.busboy); // Pipe it trough busboy
@@ -37,16 +34,9 @@ app.route('/upload').post((req, res, next) => {
   });
 });
 
-
+// download handler
 app.route('/download').post((req, res, next) => {
   console.log('inside download');
-  // const request = require('request');
-  // const ACCESS_TOKEN = '5C0XX-ba_sgAAAAAAAAAAYPnBFDgH6_9e9V_EzXItl2y-5ZB7bj8AhEiqVGjYi5x';
-
-
-  // request('https://api-content.dropbox.com/2/files/download' + 'test.png', {
-  //   auth: { bearer: ACCESS_TOKEN },
-  // }).pipe(fs.createWriteStream('files/test.png'));
 
   const request = require('request');
 
@@ -66,9 +56,7 @@ app.route('/download').post((req, res, next) => {
 });
 
 
-/**
- * Serve the basic index.html with upload form
- */
+// basic html at root
 app.route('/').get((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/html' });
   res.write('<div class="topnav">');
