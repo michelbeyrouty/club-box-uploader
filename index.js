@@ -26,8 +26,9 @@ const app = express();
 
 
 // Upload multiple files
-app.post('/bulk', upload.array('profiles', 4), (req, res) =>{
+app.post('/bulk', upload.array('profiles', 4),  (req, res, next) =>{
   try {
+    console.log(req.file);
     res.send(req.files);
   } catch (error) {
     console.log(error);
@@ -59,14 +60,14 @@ app.route('/').get((req, res) => {
   res.write('<div id="logo">Club-Box-uploader</div>');
   res.write('</div>');
   res.write('<br></br>');
-  res.write('<form action="single" method="post" enctype="multipart/form-data">');
-  res.write('<input type="file" name="fileToUpload"><br>');
+  res.write('<form action="bulk" method="post" enctype="multipart/form-data">');
+  res.write('<input type="file" name="profiles"><br>');
   res.write('<input type="submit">');
   res.write('</form>');
-  // res.write('<br></br>');
-  // res.write('<form action="download" method="post" enctype="multipart/form-data">');
-  // res.write('<input type="submit"> Download dropbox files </input>');
-  // res.write('</form>');
+  res.write('<br></br>');
+  res.write('<form action="/dropbox/download" method="post" enctype="multipart/form-data">');
+  res.write('<input type="submit"> Download dropbox files </input>');
+  res.write('</form>');
   // res.write('<br></br>');
   // res.write('<form action="upload2" method="post" enctype="multipart/form-data">');
   // res.write('<input type="submit"> upload 2 </input>');
