@@ -3,6 +3,12 @@ const CUSTOM = require('./custom');
 const { Dropbox } = require('dropbox');
 const fs = require('fs-extra');
 const path = require('path');
+const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
+const ffmpeg = require('fluent-ffmpeg');
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+console.log(ffmpegInstaller.path, ffmpegInstaller.version);
+
+
 const dbx = new Dropbox({
   accessToken: CUSTOM.DROPBOX.ACCESS_TOKEN,
 });
@@ -29,6 +35,17 @@ const app = express();
 app.post('/bulk', upload.array('profiles', 4),  (req, res, next) =>{
   try {
     console.log(req.file);
+
+    // Convert MP4 files
+    extractMP3FromVideos('./files/video.mp4', './output.mp3', (err)=>  {
+      if (!err) {
+        console.log('conversion complete');
+        // ...
+
+      }
+    });
+
+
     res.send(req.files);
   } catch (error) {
     console.log(error);
@@ -159,4 +176,24 @@ function downloadDropBoxFile (filename) {
   };
 
   request(options).pipe(fs.createWriteStream(`files/${filename}`));
+}
+
+
+/**
+ *    input - string, path of input file
+ *    output - string, path of output file
+ *    callback - function, node-style callback fn (error, result)
+ */
+function extractMP3FromVideos (input, output, callback) {
+
+  ffmpeg(input)
+  .output(output)
+  .noAudio().videoCodec('copy')
+  .on('end', () => {
+    console.log('conversion ended');
+    callback(null);
+  }).on('error', (err)=>  {
+    console.log('error: ', err);
+    callback(err);
+  }).run();
 }
