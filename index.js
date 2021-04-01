@@ -5,9 +5,8 @@ const fs = require('fs-extra');
 const path = require('path');
 const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
 const ffmpeg = require('fluent-ffmpeg');
+const multer = require('multer');
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
-console.log(ffmpegInstaller.path, ffmpegInstaller.version);
-
 
 const dbx = new Dropbox({
   accessToken: CUSTOM.DROPBOX.ACCESS_TOKEN,
@@ -17,7 +16,6 @@ const uploadPath = path.join(__dirname, CUSTOM.FILE_LOCATION); // Register the u
 fs.ensureDir(uploadPath); // Make sure that the upload path exits
 
 // Initialize mutler
-const multer = require('multer');
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './files');
@@ -35,24 +33,17 @@ const app = express();
 app.post('/bulk', upload.array('profiles', 4), (req, res, next) => {
   try {
 
-    let isVideo = false;
-
-    for (fileDetails of req.files) {
-
-      isVideo = fileDetails.filename.endsWith('mp4');
-
-      if (isVideo) {
-        extractMP3FromVideos(fileDetails.destination + '/' + fileDetails.filename);
-      }
-
-    }
+    extractMP3FromVideosListAndSave(req.files);
 
     res.send(req.files);
+
   } catch (error) {
+
     console.log(error);
     res.send(400);
   }
 });
+
 
 // Download files from dropbox
 app.post('/dropbox/download', async (req, res) => {
@@ -86,11 +77,14 @@ app.route('/').get((req, res) => {
   return res.end();
 });
 
+
 const server = app.listen(3000, () => {
   console.log(`Listening on port ${server.address().port}`);
 });
 
+
 // Private functions
+
 
 /**
  *  downloadDropBoxFile
@@ -131,16 +125,35 @@ async function listDropboxContent () {
 
 
 /**
- * extractMP3FromVideos
+ * extractMP3FromVideosListAndSave
+ *
+ * @param {array} filesList
+ */
+function extractMP3FromVideosListAndSave (filesList) {
+
+  let isVideo = false;
+
+  for (fileDetails of filesList) {
+    isVideo = fileDetails.filename.endsWith('mp4');
+
+    if (isVideo) {
+      extractMP3FromVideoAndSave(fileDetails.destination + '/' + fileDetails.filename);
+    }
+  }
+}
+
+
+/**
+ * extractMP3FromVideoAndSave
  *
  * @param {string} videoPath
  */
-function extractMP3FromVideos (videoPath) {
+function extractMP3FromVideoAndSave (videoPath) {
 
-  const audioPath = videoPath.replace('mp4', 'mp3');
+  const audioPath = videoPath.replace(CUSTOM.CONVERSTION.MP4, CUSTOM.CONVERSTION.MP3);
 
   new ffmpeg({ source: videoPath, nolog: true })
-    .toFormat('mp3')
+    .toFormat(CUSTOM.CONVERSTION.MP3)
     .on('end', () => {
       console.log('file has been converted successfully');
     })
@@ -149,7 +162,3 @@ function extractMP3FromVideos (videoPath) {
     })
     .saveToFile(audioPath);
 }
-
-
-// How faster ?
-// node functions right ?
