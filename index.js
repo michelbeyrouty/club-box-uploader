@@ -34,17 +34,18 @@ const app = express();
 // Upload multiple files
 app.post('/bulk', upload.array('profiles', 4),  (req, res, next) =>{
   try {
-    console.log(req.file);
 
-    // Convert MP4 files
-    extractMP3FromVideos('./files/video.mp4', './output.mp3', (err)=>  {
-      if (!err) {
-        console.log('conversion complete');
-        // ...
+    let isVideo = false;
 
+    for (fileDetails of req.files) {
+
+      isVideo = fileDetails.filename.endsWith('mp4');
+
+      if (isVideo) {
+        extractMP3FromVideos(fileDetails.destination +  '/' + fileDetails.filename);
       }
-    });
 
+    }
 
     res.send(req.files);
   } catch (error) {
@@ -97,71 +98,6 @@ const server = app.listen(3000, () => {
 });
 
 
-// Method 2 for downloading dropbox
-
-// const dbx = new Dropbox({ accessToken: DROP_BOX_ACCESS_TOKEN });
-
-// dbx.filesDownload({ path: '/test.png' })
-//       .then((response)=>  {
-//         console.log('File Downloaded!' + response );
-//         const buffer = response.result.fileBinary.buffer;
-
-//       })
-//       .catch((error) => {
-//         console.error(error);
-//       });
-
-
-// Insert middle-ware
-// app.use(busboy({
-//   highWaterMark: 2 * 1024 * 1024, // 2MiB buffer
-// }));
-
-
-// Upload handler
-// app.route('/upload').post((req, res, next) => {
-
-//   req.pipe(req.busboy); // Pipe it trough busboy
-
-//   req.busboy.on('file', (fieldname, file, filename) => {
-//     console.log(`Upload of '${filename}' started`);
-
-//     // Create a write stream of the new file
-//     const fstream = fs.createWriteStream(path.join(uploadPath, filename));
-
-//     // Pipe it trough
-//     file.pipe(fstream);
-
-//     // On finish of the upload
-//     fstream.on('close', () => {
-//       console.log(`Upload of '${filename}' finished`);
-//       res.redirect('back');
-//     });
-//   });
-// });
-
-
-// const uploadPath = path.join(__dirname, CUSTOM.FILE_LOCATION); // Register the upload path
-// fs.ensureDir(uploadPath); // Make sure that the upload path exits
-
-
-// app.route('/download').post((req, res, next) => {
-//   const request = require('request');
-
-//   const options = {
-//     url:     CUSTOM.DROPBOX.DOWNLOAD_URL,
-//     method:  'POST',
-//     headers: {
-//       'Authorization':   `Bearer ${CUSTOM.DROPBOX.TOKEN}`,
-//       'Dropbox-API-Arg': '{"path": "/test.png"}',
-//     },
-//   };
-
-//   request(options).pipe(fs.createWriteStream('files/test.png'));
-//   return false;
-// });
-
-
 function downloadDropBoxFile (filename) {
 
   const request = require('request');
@@ -179,21 +115,22 @@ function downloadDropBoxFile (filename) {
 }
 
 
-/**
- *    input - string, path of input file
- *    output - string, path of output file
- *    callback - function, node-style callback fn (error, result)
- */
-function extractMP3FromVideos (input, output, callback) {
+function extractMP3FromVideos (videoPath) {
 
-  ffmpeg(input)
-  .output(output)
-  .noAudio().videoCodec('copy')
+  const audioPath = videoPath.replace('mp4', 'mp3');
+
+  new ffmpeg({ source: videoPath, nolog: true })
+  .toFormat('mp3')
   .on('end', () => {
-    console.log('conversion ended');
-    callback(null);
-  }).on('error', (err)=>  {
-    console.log('error: ', err);
-    callback(err);
-  }).run();
+    console.log('file has been converted successfully');
+  })
+  .on('error', (err) => {
+    console.log('an error happened: ' + err.message);
+  })
+  .saveToFile(audioPath);
+
 }
+
+
+
+
