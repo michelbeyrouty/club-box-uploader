@@ -18,7 +18,7 @@ fs.ensureDir(uploadPath); // Make sure that the upload path exits
 // Initialize mutler
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, './files');
+    cb(null, CUSTOM.FILE_LOCATION);
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname);
@@ -134,7 +134,7 @@ function extractMP3FromVideosListAndSave (filesList) {
   let isVideo = false;
 
   for (fileDetails of filesList) {
-    isVideo = fileDetails.filename.endsWith('mp4');
+    isVideo = fileDetails.filename.endsWith(CUSTOM.CONVERSTION.MP4);
 
     if (isVideo) {
       extractMP3FromVideoAndSave(fileDetails.destination + '/' + fileDetails.filename);
