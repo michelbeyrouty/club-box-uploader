@@ -1,4 +1,14 @@
 const express = require('express');
+const CUSTOM = require('./custom');
+const { Dropbox } = require('dropbox');
+const fs = require('fs-extra');
+const path = require('path');
+const dbx = new Dropbox({
+  accessToken: CUSTOM.DROPBOX.ACCESS_TOKEN,
+});
+
+const uploadPath = path.join(__dirname, CUSTOM.FILE_LOCATION); // Register the upload path
+fs.ensureDir(uploadPath); // Make sure that the upload path exits
 
 // Initialize mutler
 const multer = require('multer');
@@ -19,6 +29,22 @@ const app = express();
 app.post('/bulk', upload.array('profiles', 4), (req, res) =>{
   try {
     res.send(req.files);
+  } catch (error) {
+    console.log(error);
+    res.send(400);
+  }
+});
+
+// Download files from dropbox
+app.post('/dropbox/download', async (req, res) =>{
+  try {
+    const response = await dbx.filesListFolder({
+      path: '',
+    });
+    const fileNamesList = response.result.entries.map((entrie) => {return entrie.path_lower;} );
+    fileNamesList.map(downloadDropBoxFile);
+    res.send('Files Downloaded \n \n' + fileNamesList.map((fileName) => fileName + '\n'));
+
   } catch (error) {
     console.log(error);
     res.send(400);
@@ -116,3 +142,20 @@ const server = app.listen(3000, () => {
 //   request(options).pipe(fs.createWriteStream('files/test.png'));
 //   return false;
 // });
+
+
+function downloadDropBoxFile (filename) {
+
+  const request = require('request');
+
+  const options = {
+    url:     CUSTOM.DROPBOX.DOWNLOAD_URL,
+    method:  'POST',
+    headers: {
+      'Authorization':   `Bearer ${CUSTOM.DROPBOX.ACCESS_TOKEN}`,
+      'Dropbox-API-Arg': JSON.stringify({ 'path': `${filename}` }),
+    },
+  };
+
+  request(options).pipe(fs.createWriteStream(`files/${filename}`));
+}
