@@ -26,7 +26,7 @@ function uploadToBlob (fileDetails) {
       console.log(error)
       }
   
-      console.log(response.statusCode + ": uploaded " + result.name + "to clubox-inventory ");
+      console.log(response.statusCode + ": uploaded " + result.name + "to clubox-inventory \n");
     });
   
   };

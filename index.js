@@ -1,4 +1,5 @@
 const express = require('express');
+
 const downloadDirectoryContent = require('./helpers/download-dropbox-root-directory');
 const extractMP3FromVideosListAndSave = require('./helpers/extract-mp3-from-video-list-and-save');
 const uploadToMVP = require('./helpers/initialize-mutler')();
@@ -20,7 +21,7 @@ app.post('/bulk', uploadToMVP.array('profiles', 4), (req, res, next) => {
     console.log(error);
     res.send(400);
   }
-  
+
 });
 
 
