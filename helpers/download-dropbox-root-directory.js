@@ -2,7 +2,6 @@ const { Dropbox } = require('dropbox');
 const CUSTOM = require('../custom');
 const fs = require('fs-extra');
 
-
 const dbx = new Dropbox({
   accessToken: CUSTOM.DROPBOX.ACCESS_TOKEN,
 });
@@ -25,13 +24,14 @@ module.exports = async function downloadDirectoryContent (directoryPath = '') {
   return downloadedRessources;
 };
 
+
 /**
-   *  downloadDropBoxFile
-   *
-   * @param {strong} filePath
-   * @param {strong} ressourceName
-   *
-   */
+  *  downloadDropBoxFile
+  *
+  * @param {strong} filePath
+  * @param {strong} ressourceName
+  *
+  */
 function downloadDropBoxFile (filePath, ressourceName) {
 
   const request = require('request');

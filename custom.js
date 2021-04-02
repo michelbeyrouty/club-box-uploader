@@ -8,7 +8,7 @@ module.exports = {
   },
 
   CONVERSTION: {
-    MP3: 'MP3',
-    MP4: 'MP4',
+    MP3: 'mp3',
+    MP4: 'mp4',
   },
 };
