@@ -1,23 +1,17 @@
 const express = require('express');
-const CUSTOM = require('./custom');
-const fs = require('fs-extra');
-const path = require('path');
 const downloadDirectoryContent = require('./helpers/download-dropbox-root-directory');
 const extractMP3FromVideosListAndSave = require('./helpers/extract-mp3-from-video-list-and-save');
-const upload = require('./helpers/initialize-mutler')();
-
-const uploadPath = path.join(__dirname, CUSTOM.FILE_LOCATION); // Register the upload path
-fs.ensureDir(uploadPath); // Make sure that the upload path exits
-
+const uploadToMVP = require('./helpers/initialize-mutler')();
+const uploadFilesToBlob = require('./helpers/upload-to-azure-blob');
 
 const app = express();
 
-
-// Upload multiple files
-app.post('/bulk', upload.array('profiles', 4), (req, res, next) => {
+// Upload multiple files, Extract MP3 from video and upload to Azure
+app.post('/bulk', uploadToMVP.array('profiles', 4), (req, res, next) => {
   try {
 
     extractMP3FromVideosListAndSave(req.files);
+    uploadFilesToBlob(req.files)
 
     res.send(req.files);
 
@@ -26,6 +20,7 @@ app.post('/bulk', upload.array('profiles', 4), (req, res, next) => {
     console.log(error);
     res.send(400);
   }
+  
 });
 
 
