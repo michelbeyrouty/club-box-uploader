@@ -49,9 +49,9 @@ app.post('/bulk', upload.array('profiles', 4), (req, res, next) => {
 app.post('/dropbox/download', async (req, res) => {
   try {
 
-    await downloadDirectoryContent();
+    const downloadedRessources = await downloadDirectoryContent();
 
-    res.send('Files Downloaded \n \n' + ressourcesDownloaded.map((fileName) => fileName + '\n'));
+    res.send('Files Downloaded \n \n' + downloadedRessources.map((fileName) => fileName + '\n'));
 
   } catch (error) {
     console.log(error);
@@ -88,6 +88,7 @@ const server = app.listen(3000, () => {
 
 async function downloadDirectoryContent (directoryPath = '') {
 
+  const downloadedRessources = [];
   const directory =  await listDirectoryContent(directoryPath);
 
   for (ressource of directory) {
@@ -96,18 +97,21 @@ async function downloadDirectoryContent (directoryPath = '') {
       await downloadDirectoryContent(ressource.path);
     }
 
-    downloadDropBoxFile(ressource.path);
-
+    downloadDropBoxFile(ressource.path, ressource.name );
+    downloadedRessources.push(ressource.name);
   }
+
+  return downloadedRessources;
 }
 
 /**
  *  downloadDropBoxFile
  *
  * @param {strong} filePath
+ * @param {strong} ressourceName
  *
  */
-function downloadDropBoxFile (filePath) {
+function downloadDropBoxFile (filePath, ressourceName) {
 
   const request = require('request');
 
@@ -120,7 +124,7 @@ function downloadDropBoxFile (filePath) {
     },
   };
 
-  request(options).pipe(fs.createWriteStream(`files/${filePath}`));
+  request(options).pipe(fs.createWriteStream(`files/${ressourceName}`));
 }
 
 
