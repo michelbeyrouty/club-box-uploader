@@ -29,7 +29,7 @@ function extractMP3FromVideoAndSave (videoPath) {
   new ffmpeg({ source: videoPath, nolog: true })
       .toFormat(CUSTOM.CONVERSTION.MP3)
       .on('end', () => {
-        console.log(audioPath.split("//")[1] + '  created successfully \n');
+        console.log(audioPath.split('//')[1] + '  created successfully \n');
       })
       .on('error', (err) => {
         console.log('an error happened: ' + err.message);

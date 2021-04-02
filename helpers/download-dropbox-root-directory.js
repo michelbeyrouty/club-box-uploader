@@ -21,7 +21,7 @@ module.exports = async function downloadDirectoryContent (directoryPath = '') {
     downloadedRessources.push(ressource.name);
   }
 
-  console.log("Downloaded from Dropbox: \n\n" + downloadedRessources.map((name) => {return name + " \n"}))
+  console.log('Downloaded from Dropbox: \n\n' + downloadedRessources.map((name) => {return name + ' \n';}));
 
   return downloadedRessources;
 };

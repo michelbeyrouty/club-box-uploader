@@ -6,27 +6,27 @@ const accessKey = CUSTOM.AZURE.ACCESS_KEY;
 const blobService = azure.createBlobService(accountName, accessKey);
 
 module.exports =  function uploadFilesToBlob (filesList) {
-    filesList.map(uploadToBlob)
+  filesList.map(uploadToBlob);
 
 };
 
 
 /**
  * uploadToBlob
- * 
- * @param {json} fileDetails 
+ *
+ * @param {json} fileDetails
  */
 function uploadToBlob (fileDetails) {
 
-    const blobName = fileDetails.filename;
-    const filePath = "./" + fileDetails.destination + fileDetails.filename;
-  
-    blobService.createBlockBlobFromLocalFile('clubox-inventory',blobName , filePath, (error, result, response) => {
-      if (error) {
-      console.log(error)
-      }
-  
-      console.log(response.statusCode + ": uploaded " + result.name + "to clubox-inventory \n");
-    });
-  
-  };
+  const blobName = fileDetails.filename;
+  const filePath = './' + fileDetails.destination + fileDetails.filename;
+
+  blobService.createBlockBlobFromLocalFile('clubox-inventory', blobName, filePath, (error, result, response) => {
+    if (error) {
+      console.log(error);
+    }
+
+    console.log(response.statusCode + ': uploaded ' + result.name + 'to clubox-inventory \n');
+  });
+
+}
