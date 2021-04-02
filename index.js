@@ -48,9 +48,10 @@ app.post('/bulk', upload.array('profiles', 4), (req, res, next) => {
 // Download files from dropbox
 app.post('/dropbox/download', async (req, res) => {
   try {
-    const fileNamesList = await listDropboxContent();
-    fileNamesList.map(downloadDropBoxFile);
-    res.send('Files Downloaded \n \n' + fileNamesList.map((fileName) => fileName + '\n'));
+
+    await downloadDirectoryContent();
+
+    res.send('Files Downloaded \n \n' + ressourcesDownloaded.map((fileName) => fileName + '\n'));
 
   } catch (error) {
     console.log(error);
@@ -85,14 +86,28 @@ const server = app.listen(3000, () => {
 
 // Private functions
 
+async function downloadDirectoryContent (directoryPath = '') {
+
+  const directory =  await listDirectoryContent(directoryPath);
+
+  for (ressource of directory) {
+
+    if (ressource.type === 'folder') {
+      await downloadDirectoryContent(ressource.path);
+    }
+
+    downloadDropBoxFile(ressource.path);
+
+  }
+}
 
 /**
  *  downloadDropBoxFile
  *
- * @param {string} filename
+ * @param {strong} filePath
  *
  */
-function downloadDropBoxFile (filename) {
+function downloadDropBoxFile (filePath) {
 
   const request = require('request');
 
@@ -101,26 +116,32 @@ function downloadDropBoxFile (filename) {
     method:  'POST',
     headers: {
       'Authorization':   `Bearer ${CUSTOM.DROPBOX.ACCESS_TOKEN}`,
-      'Dropbox-API-Arg': JSON.stringify({ 'path': `${filename}` }),
+      'Dropbox-API-Arg': JSON.stringify({ 'path': `${filePath}` }),
     },
   };
 
-  request(options).pipe(fs.createWriteStream(`files/${filename}`));
+  request(options).pipe(fs.createWriteStream(`files/${filePath}`));
 }
 
 
 /**
- * listDropboxContent
+ * listDirectoryContent
  *
  */
-async function listDropboxContent () {
+async function listDirectoryContent (directoryPath = '') {
 
   const response = await dbx.filesListFolder({
-    path: '',
+    path: directoryPath,
   });
-  const fileNamesList = response.result.entries.map((entrie) => { return entrie.path_lower; });
+  const dropboxDirectory = response.result.entries.map((entrie) => {
+    return {
+      path: entrie.path_lower,
+      type: entrie['.tag'],
+      name: entrie.name,
+    };
+  });
 
-  return fileNamesList;
+  return dropboxDirectory;
 }
 
 
