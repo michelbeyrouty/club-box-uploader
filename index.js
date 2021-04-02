@@ -13,6 +13,7 @@ app.use(busboy());
 // Upload multiple files, Extract MP3 from video and upload to Azure
 app.post('/bulk', uploadToMVP.array('profiles', 4), (req, res, next) => {
   try {
+    console.log('upload done');
 
     extractMP3FromVideosListAndSave(req.files);
     uploadFilesToBlob(req.files);
