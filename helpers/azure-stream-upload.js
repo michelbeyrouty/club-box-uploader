@@ -5,7 +5,9 @@ const CUSTOM = require('../custom');
 const accountName = CUSTOM.AZURE.ACCOUNT_NAME;
 const accessKey = CUSTOM.AZURE.ACCESS_KEY;
 
-module.exports = function azureStreamUpload (req) {
+module.exports = function azureStreamUpload (req, res) {
+
+  console.log('started upload');
 
   req.pipe(req.busboy);
 
@@ -16,6 +18,10 @@ module.exports = function azureStreamUpload (req) {
         console.log(filename + ' uploaded to azure');
       }
     }));
+  });
+
+  req.busboy.on('finish', () => {
+    res.send('uploading');
   });
 
 };

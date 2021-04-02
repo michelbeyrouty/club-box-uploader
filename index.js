@@ -44,9 +44,7 @@ app.post('/dropbox/download', async (req, res) => {
 
 app.post('/streamUpload', (req, res, params) => {
 
-  azureStreamUpload(req);
-
-  res.send('uploading');
+  azureStreamUpload(req, res);
 
 });
 
